@@ -1,6 +1,7 @@
 package com.etl.firebaseapplication;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,9 +15,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -76,7 +80,6 @@ public class SignUpFragment extends Fragment {
     }
 
     private void signInWithEmailAndPassword(String name, String gender, String mobileNumber, String email, String password) {
-
        final HashMap<String,Object> userMap = new HashMap<>();
         userMap.put("name",name);
         userMap.put("gender",gender);
@@ -88,18 +91,33 @@ public class SignUpFragment extends Fragment {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()){
 
+                    //email verification
+                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                    user.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(getContext(), "Verify email has been sent", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    });
+
+
+
+
                     String userId = firebaseAuth.getCurrentUser().getUid();
-
                     userMap.put("userId",userId);
-
                     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-
                     DatabaseReference userRef = firebaseDatabase.getReference().child("userList").child(userId);
-
                     userRef.setValue(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             Toast.makeText(getContext(), "Sign In Successfully", Toast.LENGTH_SHORT).show();
+
+                            startActivity(new Intent(getActivity().getApplication(),MainActivity.class));
                         }
                     });
 

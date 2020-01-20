@@ -9,12 +9,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.etl.firebaseapplication.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
 
     private UserAdapter userAdapter;
 
+    private Button verifyBtn;
+    private TextView emailStatusTV;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +48,30 @@ public class MainActivity extends AppCompatActivity {
         init();
         configRecyclerView();
         getDataFromDB();
+
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+
+        final FirebaseUser user = firebaseAuth.getCurrentUser();
+        if (!user.isEmailVerified()){
+            verifyBtn.setVisibility(View.VISIBLE);
+            emailStatusTV.setText(View.VISIBLE);
+
+            verifyBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    user.sendEmailVerification().addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(MainActivity.this, "Verify email has been sent", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            });
+        }else {
+            verifyBtn.setVisibility(View.INVISIBLE);
+            emailStatusTV.setText(View.INVISIBLE);
+        }
+
     }
 
     private void configRecyclerView() {
@@ -56,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
        recyclerView = findViewById(R.id.recyclerView);
        userList = new ArrayList<>();
        userAdapter = new UserAdapter(this,userList);
+
+       verifyBtn = findViewById(R.id.verifyBtn);
+       emailStatusTV = findViewById(R.id.emailStatusET);
 
        //firebase
         firebaseDatabase = FirebaseDatabase.getInstance();
@@ -88,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-
                 Toast.makeText(MainActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

@@ -5,10 +5,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-
     android:layout_marginRight="16dp"
     android:layout_marginLeft="16dp"
     tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/emailStatusET"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:visibility="invisible"
+        android:text="Email Not Verified"/>
+
+    <Button
+        android:id="@+id/verifyBtn"
+        android:text="Verify now"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+
 
 <EditText
     android:id="@+id/nameET"
